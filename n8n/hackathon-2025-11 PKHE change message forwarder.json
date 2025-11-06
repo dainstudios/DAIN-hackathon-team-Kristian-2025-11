@@ -392,13 +392,24 @@
             "node": "Edit Fields",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
     },
     "Prepare template message": {
       "main": [
-        []
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -406,7 +417,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "f3bfafb0-c346-4946-bdad-aa2637d84994",
+  "versionId": "79aa0372-3eb5-44d2-8db8-b7f7c86025ac",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "9e227d6762a547c66bd73dd57fa04f7926ee2eb1dd5be1eef8e30975f2d14bc9"
