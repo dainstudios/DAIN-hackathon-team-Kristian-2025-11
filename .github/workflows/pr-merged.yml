@@ -1,0 +1,19 @@
+name: PR Merged to Main
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  on-merged-to-main:
+    name: Run on PR merge to main
+    if: ${{ github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print PR merge info
+        run: |
+          echo "PR #${{ github.event.pull_request.number }} merged into main."
+          echo "Title: ${{ github.event.pull_request.title }}"
+          echo "Merged by: ${{ github.event.pull_request.merged_by.login }}"
+          echo "Head: ${{ github.event.pull_request.head.label }} -> Base: ${{ github.event.pull_request.base.ref }}"
+
