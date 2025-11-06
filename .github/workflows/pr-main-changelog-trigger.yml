@@ -1,0 +1,25 @@
+name: Notify on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  notify:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call n8n Webhook
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d '{
+              "repo": "${{ github.repository }}",
+              "pr_title": "${{ github.event.pull_request.title }}",
+              "pr_body": "${{ github.event.pull_request.body }}",
+              "pr_number": "${{ github.event.pull_request.number }}",
+              "merged_by": "${{ github.event.pull_request.merged_by.login }}"
+            }' \
+            ${{ secrets.N8N_WEBHOOK_URL }}
