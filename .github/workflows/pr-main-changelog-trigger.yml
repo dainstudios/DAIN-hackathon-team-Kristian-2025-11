@@ -37,20 +37,39 @@ jobs:
           
           echo "commits=$COMMITS_ESCAPED" >> $GITHUB_OUTPUT
           echo "diff=$DIFF_ESCAPED" >> $GITHUB_OUTPUT
+
+      - name: Prepare JSON payload
+        id: payload
+        run: |
+          # Build JSON payload and store it in a file for both echo and curl
+          cat <<EOF > payload.json
+          {
+            "repo": "${{ github.repository }}",
+            "pr_title": "${{ github.event.pull_request.title }}",
+            "pr_body": "${{ github.event.pull_request.body }}",
+            "pr_number": "${{ github.event.pull_request.number }}",
+            "merged_by": "${{ github.event.pull_request.merged_by.login }}",
+            "commits": ${{ steps.changes.outputs.commits }},
+            "diff": ${{ steps.changes.outputs.diff }}
+          }
+          EOF
+
+          echo "=== Debug Payload Preview ==="
+          cat payload.json
           
       - name: Call n8n Webhook
         env:
           N8N_URL: ${{ secrets.N8N_WEBHOOK_URL }}
         run: |
-          curl -X POST \
+          echo "Sending payload to n8n..."
+          curl -s -o response.txt -w "%{http_code}" \
+            -X POST \
             -H "Content-Type: application/json" \
-            -d "{
-              \"repo\": \"${{ github.repository }}\",
-              \"pr_title\": \"${{ github.event.pull_request.title }}\",
-              \"pr_body\": \"${{ github.event.pull_request.body }}\",
-              \"pr_number\": \"${{ github.event.pull_request.number }}\",
-              \"merged_by\": \"${{ github.event.pull_request.merged_by.login }}\",
-              \"commits\": ${{ steps.changes.outputs.commits }},
-              \"diff\": ${{ steps.changes.outputs.diff }}
-            }" \
-            \"$N8N_URL\"
+            -d @payload.json \
+            "$N8N_URL" | tee http_status.txt
+
+          STATUS=$(cat http_status.txt)
+          echo "n8n HTTP Status: $STATUS"
+
+          echo "--- n8n Response ---"
+          cat response.txt
