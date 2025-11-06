@@ -11,15 +11,46 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # get full history so we can diff properly
+
+      - name: Extract PR info and changes
+        id: changes
+        run: |
+          # Get the merge commit SHA
+          MERGE_COMMIT_SHA="${{ github.event.pull_request.merge_commit_sha }}"
+
+          # Get the base (target branch before merge)
+          BASE_REF="${{ github.event.pull_request.base.sha }}"
+          
+          # Get commits included in this PR
+          COMMITS=$(git log --oneline "${BASE_REF}..${MERGE_COMMIT_SHA}")
+          
+          # Get diff summary (only filenames and stats)
+          DIFF=$(git diff --stat "${BASE_REF}" "${MERGE_COMMIT_SHA}")
+
+          # Encode to safe JSON for curl
+          COMMITS_ESCAPED=$(echo "$COMMITS" | jq -Rs .)
+          DIFF_ESCAPED=$(echo "$DIFF" | jq -Rs .)
+          
+          echo "commits=$COMMITS_ESCAPED" >> $GITHUB_OUTPUT
+          echo "diff=$DIFF_ESCAPED" >> $GITHUB_OUTPUT
+          
       - name: Call n8n Webhook
+        env:
+          N8N_URL: ${{ secrets.N8N_WEBHOOK_URL }}
         run: |
           curl -X POST \
             -H "Content-Type: application/json" \
-            -d '{
-              "repo": "${{ github.repository }}",
-              "pr_title": "${{ github.event.pull_request.title }}",
-              "pr_body": "${{ github.event.pull_request.body }}",
-              "pr_number": "${{ github.event.pull_request.number }}",
-              "merged_by": "${{ github.event.pull_request.merged_by.login }}"
-            }' \
-            ${{ secrets.N8N_WEBHOOK_URL }}
+            -d "{
+              \"repo\": \"${{ github.repository }}\",
+              \"pr_title\": \"${{ github.event.pull_request.title }}\",
+              \"pr_body\": \"${{ github.event.pull_request.body }}\",
+              \"pr_number\": \"${{ github.event.pull_request.number }}\",
+              \"merged_by\": \"${{ github.event.pull_request.merged_by.login }}\",
+              \"commits\": ${{ steps.changes.outputs.commits }},
+              \"diff\": ${{ steps.changes.outputs.diff }}
+            }" \
+            \"$N8N_URL\"
