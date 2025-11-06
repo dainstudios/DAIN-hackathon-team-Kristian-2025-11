@@ -228,8 +228,8 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.3,
       "position": [
-        1584,
-        240
+        1600,
+        48
       ],
       "id": "e3fcbc3b-0637-463e-ad3c-468e6ef65afb",
       "name": "Send a message1",
@@ -389,11 +389,6 @@
       "main": [
         [
           {
-            "node": "Send a message",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "Edit Fields",
             "type": "main",
             "index": 0
@@ -403,21 +398,15 @@
     },
     "Prepare template message": {
       "main": [
-        [
-          {
-            "node": "Send a message1",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "9702a867-1900-43ea-bdc9-040d81eeb0de",
+  "versionId": "f3bfafb0-c346-4946-bdad-aa2637d84994",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "9e227d6762a547c66bd73dd57fa04f7926ee2eb1dd5be1eef8e30975f2d14bc9"
